@@ -19,7 +19,8 @@ A `dna.md` can be:
 ## What to Load
 
 **Writing a feature or fix against an existing fingerprint:**
-- Load the project's `dna.md` only. Nothing else from this skill is needed.
+- Load the project's `dna.md` only.
+- If a term or position in `dna.md` is ambiguous, or you are unsure how to apply it to the code you are writing, load the relevant vocabulary file for that axis only. Do not load the full vocabulary preemptively.
 
 **Auditing a codebase to produce a draft `dna.md`:**
 - Load `vocabulary/sliders.md`
