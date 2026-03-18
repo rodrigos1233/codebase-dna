@@ -9,9 +9,12 @@ project: ""
 language: ""
 stack: ""
 
-## preferred libs/domains
-preferred-libs: ""  # only durable choices
-preferred-domains: ""  # only durable choices
+## preferred libs
+testing: ""  # durable default only
+logging: ""  # durable default only
+validation: ""  # durable default only
+authentication: ""  # durable default only
+data-access: ""  # durable default only
 
 ## critical rules
 ### do not use
