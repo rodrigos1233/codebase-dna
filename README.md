@@ -71,11 +71,28 @@ If your agent supports loading context files directly, copy or reference `SKILL.
 
 | Task | Files to include |
 |---|---|
-| Writing code against a fingerprint | `SKILL.md` + your project's `dna.md` |
+| Focused implementation task | `SKILL.md` + fresh/generated `dna.inject.md` |
+| Broad or cross-cutting work | `SKILL.md` + your project's `dna.md` |
 | Auditing a codebase | `SKILL.md` + `vocabulary/` + `audit/` + `template/dna.template.md` |
 | Filling a fingerprint manually | `SKILL.md` + `vocabulary/` + `template/` |
 
-For system prompt injection (e.g. API usage), include the content of the relevant files directly. Use `template/dna.minimal.template.md` for the fingerprint itself — it's designed to fit comfortably in a system prompt.
+For system prompt injection (e.g. API usage), include the content of the relevant files directly. Use `template/dna.minimal.template.md` as the reusable, prompt-sized fingerprint. Use `template/dna.inject.md` as the format for generating a fresh one-off `dna.inject.md` for a scoped task.
+
+### Validation Rubric
+
+Use the smallest context that still covers the task:
+
+| Pressure scenario | Minimum context to load |
+|---|---|
+| Audit a codebase from scratch | `SKILL.md` + `vocabulary/` + `audit/` + `template/dna.template.md` |
+| Write a focused feature against an existing fingerprint | `SKILL.md` + fresh/generated `dna.inject.md` + only the project files needed for the feature |
+| Generate a task-scoped `dna.inject.md` for a narrow bug fix | `SKILL.md` + `scope/prompt.md` + the existing `dna.md` + `template/dna.inject.md` + the task description in prose + only the bug-relevant source files |
+
+Practical checks:
+
+- Do not load audit vocabulary during normal write tasks unless a term is ambiguous.
+- Keep `dna.inject.md` in the compact range, not the full fingerprint range.
+- Reserve full `dna.md` for onboarding, audit, or broad cross-cutting work.
 
 ---
 
@@ -120,23 +137,31 @@ The agent will load the vocabulary and audit instructions, read a representative
 
 ### Use an existing fingerprint
 
-Add to your project's `CLAUDE.md` (or equivalent):
+For broad or cross-cutting work, reference the project fingerprint in your project's `CLAUDE.md` (or equivalent):
 
 ```markdown
 @dna.md
 ```
 
-Or reference it explicitly:
+Or say it directly:
 
 ```
-Use the project fingerprint in dna.md to guide your code style.
+Use the project fingerprint in dna.md to guide broad or cross-cutting work.
 ```
 
-The agent will load the fingerprint and use it to match existing patterns when writing new code. If it encounters an unfamiliar term, it will load only the relevant vocabulary section — not the full skill.
+For broad or cross-cutting work, the agent will load the fingerprint and use it to match existing patterns when writing new code. If it encounters an unfamiliar term, it will load only the relevant vocabulary section — not the full skill.
+
+For focused implementation tasks, generate a fresh `dna.inject.md` for that task instead of relying on a persistent include.
 
 ### Scope a fingerprint to a specific task
 
-A full `dna.md` is useful for auditing and onboarding, but it's more context than most individual tasks need. For focused work, generate a task-scoped injection instead:
+Use the narrowest fingerprint that still fits the task:
+
+- Focused implementation task: generate and use `dna.inject.md`.
+- Broad or cross-cutting work: load the full `dna.md`.
+- Audit or manual fingerprinting: load the vocabulary and template files; add audit materials only when auditing code.
+
+A task-scoped injection is the default for focused implementation work because it keeps only the rules that matter for that change. Generate it like this:
 
 ```
 Given this task: [describe the task]
@@ -144,13 +169,11 @@ And this fingerprint: @dna.md
 Run the codebase-dna scope agent and produce a dna.inject.md.
 ```
 
-The scope agent filters the full fingerprint down to the rules most likely to prevent mistakes for that specific task — typically 20–40 lines. Dead ends, simplicity zones, and known debt always survive. Slider positions and descriptive prose get dropped. The result can be pasted directly into a system prompt or used as a CLAUDE.md preamble.
-
-This is the right default for most day-to-day coding tasks. Use the full `dna.md` when onboarding to a project or when a task cuts across many areas.
+The scope agent filters the full fingerprint down to the rules most likely to prevent mistakes for that specific task — typically 20–40 lines. Dead ends, simplicity zones, and known debt always survive. Slider positions and descriptive prose get dropped. The result can be pasted directly into a task-specific system prompt.
 
 ### Fill a fingerprint manually
 
-Copy `template/dna.template.md` (full) or `template/dna.minimal.template.md` (for system prompts) to your project root and fill it in. The `vocabulary/` files define every axis and property precisely if you need a reference.
+Copy `template/dna.template.md` (full) or `template/dna.minimal.template.md` (for a persistent prompt include) to your project root and fill it in. `template/dna.inject.md` defines the task-scoped injection format; generate a fresh `dna.inject.md` for focused implementation work. The `vocabulary/` files define the axes and properties precisely; use `audit/` only if you also need the sampling strategy or audit prompt.
 
 ---
 
@@ -170,8 +193,8 @@ codebase-dna/
 │   └── prompt.md               # Agent that scopes dna.md to a specific task
 └── template/
     ├── dna.template.md         # Full fingerprint template
-    ├── dna.minimal.template.md # Stripped version for system prompt injection
-    └── dna.inject.md           # Task-scoped injection format (output of scope agent)
+    ├── dna.minimal.template.md # Compact long-lived fingerprint for reusable prompt injection
+    └── dna.inject.md           # Task-scoped injection format/template used by the scope agent
 ```
 
 ### When to use which format
@@ -179,5 +202,7 @@ codebase-dna/
 | Format | Use when |
 |---|---|
 | `dna.template.md` | Auditing, human review, storing in the repo |
-| `dna.minimal.template.md` | Permanent CLAUDE.md reference for the whole project |
-| `dna.inject.md` | Per-task context injection — generate fresh each time |
+| `dna.minimal.template.md` | Compact long-lived fingerprint for a persistent include when you want a slim, stable reference |
+| `dna.inject.md` | Per-task context injection for focused implementation work - generate fresh each time |
+
+Use `dna.minimal.template.md` when you want a compact fingerprint that can live in a long-lived prompt include. Use a freshly generated `dna.inject.md` when the task is scoped and you want the narrowest set of rules for that one change. Keep `dna.template.md` for audit/review workflows and for fields that are useful to humans but not worth carrying into injection.

@@ -1,56 +1,18 @@
 ---
 name: codebase-dna
-description: Use when auditing a codebase to produce a structured fingerprint, writing code consistently against an existing fingerprint, or filling/correcting a dna.md file
+description: Use when auditing a codebase to produce a dna.md, writing code against an existing fingerprint, scoping a fingerprint to a specific task, or filling one manually.
 ---
 
 # codebase-dna
 
-A shared vocabulary and tooling for describing, auditing, and using codebase style fingerprints.
+`dna.md` is the project fingerprint: a compact description of how the code is written, not what it does.
 
-## What is a `dna.md`?
+## Modes
 
-A `dna.md` is a structured fingerprint of a codebase — its style, constraints, preferred patterns, and known debt. It is not a summary of what the code does. It describes *how* the code is written, so an agent can produce new code that fits without reading the whole codebase.
+- Focused implementation task: use `scope/prompt.md` with the project's `dna.md` to generate a fresh `dna.inject.md`, then use that instead of the full fingerprint.
+- Broad or cross-cutting work: load the project's full `dna.md`.
+- Audit or manual fingerprinting: load `vocabulary/sliders.md`, `vocabulary/binaries.md`, `vocabulary/meta.md`, and `template/dna.template.md` or `template/dna.minimal.template.md`; add `audit/sampling-strategy.md` and `audit/prompt.md` only when auditing code.
 
-A `dna.md` can be:
-- Stored at the project root and referenced from `CLAUDE.md`
-- Injected directly into a subagent system prompt
-- Filled by a human, an audit agent, or both
+If a term or position in `dna.md` is ambiguous, load only the relevant vocabulary file for that axis. Do not preload the full vocabulary.
 
-## What to Load
-
-**Writing a feature or fix against an existing fingerprint:**
-- Load the project's `dna.md` only.
-- If a term or position in `dna.md` is ambiguous, or you are unsure how to apply it to the code you are writing, load the relevant vocabulary file for that axis only. Do not load the full vocabulary preemptively.
-- If the `dna.md` is long and the task is narrow, consider running the scope agent first to get a compact `dna.inject.md` instead.
-
-**Scoping a fingerprint to a specific task (recommended for focused tasks):**
-- Load the project's `dna.md` and the task description
-- Load `scope/prompt.md`
-- Output a `dna.inject.md` using `template/dna.inject.md`
-- Use the inject output in place of the full `dna.md` for the task
-
-**Auditing a codebase to produce a draft `dna.md`:**
-- Load `vocabulary/sliders.md`
-- Load `vocabulary/binaries.md`
-- Load `vocabulary/meta.md`
-- Load `audit/sampling-strategy.md`
-- Load `audit/prompt.md`
-- Use `template/dna.template.md` as the output structure
-
-**Filling or correcting a fingerprint manually:**
-- Load `vocabulary/sliders.md`
-- Load `vocabulary/binaries.md`
-- Load `vocabulary/meta.md`
-- Use `template/dna.template.md` or `template/dna.minimal.template.md`
-
-## Vocabulary Overview
-
-- `vocabulary/sliders.md` — 19 axes with two extremes each. Every axis is a spectrum, not a right answer.
-- `vocabulary/binaries.md` — 6 binary (yes/no) properties with verification instructions.
-- `vocabulary/meta.md` — Cross-cutting concepts: descriptive vs aspirational positions, dead ends, simplicity zones, and drift detection.
-
-## Design Principles
-
-- The vocabulary defines spectrums. It does not prescribe correct positions.
-- Positions are descriptive by default. Aspirational positions must be explicitly marked.
-- Two agents reading the same codebase should produce the same fingerprint.
+Do not load vocabulary or audit docs unless the active mode requires them. Do not preload extra files.
