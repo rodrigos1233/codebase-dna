@@ -12,7 +12,7 @@ You are auditing a codebase to produce a structured fingerprint called `dna.md`.
 
 Before reading any code, load these files from the `codebase-dna` skill:
 
-1. `vocabulary/sliders.md` — definitions for all 18 slider axes
+1. `vocabulary/sliders.md` — definitions for all 19 slider axes
 2. `vocabulary/binaries.md` — definitions for all 6 binary properties
 3. `vocabulary/meta.md` — how to use descriptive vs aspirational positions, dead ends, simplicity zones, and drift
 4. `audit/sampling-strategy.md` — which files to read and in what order

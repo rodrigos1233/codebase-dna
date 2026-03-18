@@ -48,11 +48,16 @@ stack: ""    # only what's relevant to this task
 ### libraries to avoid
 - ""    # from preferred-libs where a wrong choice is likely
 
-## binaries that apply
+## constraints that apply
 <!--
-  Include only binaries relevant to the code being written.
-  Skip binaries that don't constrain the task.
+  Include only binary properties and scalar constraints relevant to the code being written.
+  Skip anything that doesn't constrain the task.
 -->
 pure-functions: true/false — scope: ""
+idempotency: true/false — scope: ""
 null-safety: true/false
-type-strictness: ""    # e.g., "strict — no any, no ts-ignore"
+determinism: true/false — scope: ""
+encryption-at-rest: true/false — scope: ""
+authentication-boundaries: true/false — scope: "" — mechanism: ""
+type-strictness: ""    # from slider notes, e.g., "strict — no any, no ts-ignore"
+error-handling-loudness: ""    # from slider notes, e.g., "fail fast with explicit logs"
