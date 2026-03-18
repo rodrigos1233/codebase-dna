@@ -42,6 +42,8 @@ When both `position` and `aspirational` are present:
 
 ## Dead Ends
 
+> **One-line distinction:** A dead end is a pattern that is **gone** — abandoned and replaced. Known debt (see below) is a pattern that is **still there** but should not be imitated.
+
 A dead end is a pattern that was tried, caused problems, and was intentionally abandoned. Dead ends are recorded so that future agents and developers do not rediscover the same wrong path.
 
 ### What to record
@@ -107,6 +109,50 @@ simplicity-zones:
 ### How agents should use simplicity zones
 
 When working in or near a simplicity zone, match the existing simplicity. Do not apply standard engineering improvements. If a task requires adding complexity to a simplicity zone, flag it explicitly before proceeding.
+
+---
+
+## Known Debt
+
+> **One-line distinction:** Known debt is a pattern that is **still present** in the codebase but acknowledged as wrong. Dead ends (see above) are patterns that have been **removed and replaced**.
+
+Known debt exists because some code predates current standards, was written under pressure, or hasn't been refactored yet. It is recorded so that agents encountering it don't treat it as a model to follow.
+
+### What to record
+
+- The pattern that exists but shouldn't
+- Where it lives (module, directory, or specific file)
+- Why it exists (historical context, not judgment)
+- What not to do when working nearby
+
+### Format
+
+```yaml
+known-debt:
+  - pattern: "Raw SQL strings assembled with string concatenation"
+    location: "legacy/reports/"
+    why-it-exists: >
+      Written before the ORM was adopted. Not yet migrated because the
+      reports module is rarely touched and migration carries risk.
+    do-not-imitate: >
+      Use the query builder for all new queries, including in this directory.
+      Do not add new string-concatenated SQL even to match surrounding code.
+
+  - pattern: "console.log for debugging left in production paths"
+    location: "scattered — search for 'console.log' in src/"
+    why-it-exists: >
+      Accumulated over time before the structured logger was standardized.
+    do-not-imitate: >
+      Use the logger module for all output. console.log is not captured
+      by the log aggregator and will not appear in production dashboards.
+```
+
+### How agents should use known debt
+
+When you encounter a known-debt pattern while working in that area:
+1. Do not imitate it, even to stay consistent with surrounding code.
+2. Do not refactor it unless the task explicitly includes cleanup.
+3. Note in your output that you chose not to imitate the surrounding pattern and why.
 
 ---
 
