@@ -21,6 +21,13 @@ A `dna.md` can be:
 **Writing a feature or fix against an existing fingerprint:**
 - Load the project's `dna.md` only.
 - If a term or position in `dna.md` is ambiguous, or you are unsure how to apply it to the code you are writing, load the relevant vocabulary file for that axis only. Do not load the full vocabulary preemptively.
+- If the `dna.md` is long and the task is narrow, consider running the scope agent first to get a compact `dna.inject.md` instead.
+
+**Scoping a fingerprint to a specific task (recommended for focused tasks):**
+- Load the project's `dna.md` and the task description
+- Load `scope/prompt.md`
+- Output a `dna.inject.md` using `template/dna.inject.md`
+- Use the inject output in place of the full `dna.md` for the task
 
 **Auditing a codebase to produce a draft `dna.md`:**
 - Load `vocabulary/sliders.md`

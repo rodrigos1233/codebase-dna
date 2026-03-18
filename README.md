@@ -134,6 +134,20 @@ Use the project fingerprint in dna.md to guide your code style.
 
 The agent will load the fingerprint and use it to match existing patterns when writing new code. If it encounters an unfamiliar term, it will load only the relevant vocabulary section — not the full skill.
 
+### Scope a fingerprint to a specific task
+
+A full `dna.md` is useful for auditing and onboarding, but it's more context than most individual tasks need. For focused work, generate a task-scoped injection instead:
+
+```
+Given this task: [describe the task]
+And this fingerprint: @dna.md
+Run the codebase-dna scope agent and produce a dna.inject.md.
+```
+
+The scope agent filters the full fingerprint down to the rules most likely to prevent mistakes for that specific task — typically 20–40 lines. Dead ends, simplicity zones, and known debt always survive. Slider positions and descriptive prose get dropped. The result can be pasted directly into a system prompt or used as a CLAUDE.md preamble.
+
+This is the right default for most day-to-day coding tasks. Use the full `dna.md` when onboarding to a project or when a task cuts across many areas.
+
 ### Fill a fingerprint manually
 
 Copy `template/dna.template.md` (full) or `template/dna.minimal.template.md` (for system prompts) to your project root and fill it in. The `vocabulary/` files define every axis and property precisely if you need a reference.
@@ -152,7 +166,18 @@ codebase-dna/
 ├── audit/
 │   ├── prompt.md               # Ready-to-use prompt for an audit agent
 │   └── sampling-strategy.md    # Which files to read and in what order
+├── scope/
+│   └── prompt.md               # Agent that scopes dna.md to a specific task
 └── template/
     ├── dna.template.md         # Full fingerprint template
-    └── dna.minimal.template.md # Stripped version for system prompt injection
+    ├── dna.minimal.template.md # Stripped version for system prompt injection
+    └── dna.inject.md           # Task-scoped injection format (output of scope agent)
 ```
+
+### When to use which format
+
+| Format | Use when |
+|---|---|
+| `dna.template.md` | Auditing, human review, storing in the repo |
+| `dna.minimal.template.md` | Permanent CLAUDE.md reference for the whole project |
+| `dna.inject.md` | Per-task context injection — generate fresh each time |
