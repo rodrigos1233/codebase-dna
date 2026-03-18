@@ -36,14 +36,19 @@ defensive-programming: #/10
 memory-speed-tradeoff: #/10
 build-vs-buy-appetite: #/10
 dependency-appetite: #/10
+data-flow-patterns: #/10
 
 ## binaries
-pure-functions: true/false
-idempotency: true/false
-null-safety: true/false
-determinism: true/false
-encryption-at-rest: true/false
-authentication-boundaries: true/false — mechanism: ""
+<!--
+  scope: is optional but almost always worth filling for pure-functions and encryption-at-rest.
+  Format: property: true/false [scope: "..."] [note]
+-->
+pure-functions: true/false — scope: ""
+idempotency: true/false — scope: ""
+null-safety: true/false — scope: ""
+determinism: true/false — scope: ""
+encryption-at-rest: true/false — scope: ""
+authentication-boundaries: true/false — scope: "" — mechanism: ""
 
 ## preferred-libs
 http-server: ""

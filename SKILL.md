@@ -38,7 +38,7 @@ A `dna.md` can be:
 
 ## Vocabulary Overview
 
-- `vocabulary/sliders.md` — 18 axes with two extremes each. Every axis is a spectrum, not a right answer.
+- `vocabulary/sliders.md` — 19 axes with two extremes each. Every axis is a spectrum, not a right answer.
 - `vocabulary/binaries.md` — 6 binary (yes/no) properties with verification instructions.
 - `vocabulary/meta.md` — Cross-cutting concepts: descriptive vs aspirational positions, dead ends, simplicity zones, and drift detection.
 

@@ -191,6 +191,15 @@ dependency-appetite:
   notes: >
 ```
 
+### data-flow-patterns
+```yaml
+data-flow-patterns:
+  position:           # 0 = ad hoc flow, 10 = disciplined flow
+  descriptive: >
+  aspirational: >
+  notes: >            # cover: where transformation happens, data shape at boundaries, result type pattern
+```
+
 ---
 
 ## binaries
@@ -215,6 +224,7 @@ idempotency:
 ```yaml
 null-safety:
   value:              # true or false
+  scope: ""           # e.g., "server-side TypeScript only" — omit if applies globally
   notes: >
 ```
 
@@ -222,6 +232,7 @@ null-safety:
 ```yaml
 determinism:
   value:              # true or false
+  scope: ""           # e.g., "domain and service layers — infrastructure layer excluded"
   notes: >
 ```
 
@@ -237,6 +248,7 @@ encryption-at-rest:
 ```yaml
 authentication-boundaries:
   value:              # true or false
+  scope: ""           # e.g., "HTTP API — internal gRPC calls use mTLS separately"
   notes: >
   mechanism: ""       # e.g., "JWT middleware applied globally in routes.ts"
 ```
@@ -247,35 +259,39 @@ authentication-boundaries:
 
 <!--
   Record the library or approach used per problem domain.
-  Add or remove domains as appropriate for the project.
+  Include only domains where the project has a real opinion.
+  Remove rows that don't apply. Add rows the project needs.
   Format: domain: "library-name — brief note on how it is used"
 -->
 
 ```yaml
 preferred-libs:
+  # Core
   http-server: ""
   routing: ""
   orm-or-query-builder: ""
   database-migrations: ""
   validation: ""
+
+  # Auth
   authentication: ""
   authorization: ""
+
+  # Testing
   testing-unit: ""
   testing-integration: ""
   testing-e2e: ""
-  test-assertions: ""
   mocking: ""
+
+  # Observability
   logging: ""
   error-tracking: ""
   metrics: ""
-  job-queue: ""
+
+  # Infrastructure (include only if the project has opinions)
   caching: ""
-  file-storage: ""
-  email: ""
-  api-client-generation: ""
-  date-time: ""
+  job-queue: ""
   env-config: ""
-  dependency-injection: ""
 ```
 
 ---

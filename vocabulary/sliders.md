@@ -228,6 +228,26 @@ Each axis is a spectrum from 0 (left extreme) to 10 (right extreme). Positions a
 
 ---
 
+## data-flow-patterns
+
+**Definition:** How consistently the codebase defines where data changes shape and who owns each transformation. Covers the discipline around data at layer boundaries, immutability, and how errors are represented as values vs exceptions.
+
+| 0 — Ad Hoc Flow | 10 — Disciplined Flow |
+|---|---|
+| Data is mutated or reshaped wherever convenient. No consistent shape at layer boundaries. Raw DB rows, domain objects, and API payloads are mixed and passed freely. Errors surface as exceptions or nulls. | Each layer boundary has a defined data shape. Transformation is owned by a specific layer. Immutability is enforced within pipelines. Errors are represented as typed result values (e.g., `Result<T, E>`, `Either`, tagged union). |
+
+**Tradeoff:** Ad hoc flow is faster to write and requires no upfront schema design per layer. Disciplined flow makes data contracts explicit, reduces bugs from unexpected shape mutations, and makes transformations independently testable — but requires more upfront structure and discipline to maintain.
+
+**How to identify:**
+- Are there distinct DTO, domain, and persistence types, or is one type used everywhere?
+- Do functions receive the raw DB row or a mapped domain object?
+- Is data mutated in place (e.g., `user.name = newName`) or replaced immutably (e.g., `{ ...user, name: newName }`)?
+- Are errors returned as typed values (`Result`, `Option`, tagged union) or thrown as exceptions?
+- Are API responses constructed from a dedicated serialization layer, or do internal objects get JSON-serialized directly?
+- Look for `toDTO()`, `toDomain()`, `fromRow()` mapping functions — their presence signals disciplined flow.
+
+---
+
 ## build-vs-buy-appetite
 
 **Definition:** Whether the team prefers to build custom solutions or adopt external libraries and services.
