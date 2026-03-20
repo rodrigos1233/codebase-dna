@@ -32,12 +32,12 @@
 
 ## dead-ends
 ```yaml
-# All entries from source dna.md, always included in full
+# Entries where the abandoned pattern could plausibly be reached for in this task area
 ```
 
 ## known-debt
 ```yaml
-# All entries from source dna.md, always included in full
+# Entries where location overlaps with files or domains touched by this task
 ```
 
 ## simplicity-zones

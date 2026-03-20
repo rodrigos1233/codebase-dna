@@ -22,7 +22,7 @@ Load all of the following, in this order:
 5. `template/dna.template.md` — the output format
 
 **Filling a fingerprint manually (without a full audit)**
-Load `vocabulary/sections.md`, `vocabulary/meta.md`, and `template/dna.template.md` or `template/dna.minimal.template.md`.
+Load `vocabulary/sections.md`, `vocabulary/meta.md`, and `template/dna.template.md` or `template/dna.minimal.template.md`. Note: `dna.minimal.template.md` omits evidence levels — use `dna.template.md` when recording active migrations or mixed-confidence entries.
 
 ## Vocabulary loading rule
 
