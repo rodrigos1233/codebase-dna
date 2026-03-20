@@ -1,5 +1,11 @@
 # DNA Fingerprint
 
+<!--
+  Compact template. Evidence levels and aspirational markers are omitted by design.
+  Agents reading this fingerprint should treat all entries as observed unless otherwise noted inline.
+  Use dna.template.md when evidence levels or active migrations need to be recorded.
+-->
+
 ```yaml
 project: ""
 audited-by: ""

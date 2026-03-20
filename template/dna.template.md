@@ -37,27 +37,25 @@ codebase-version: ""     # git commit SHA or version tag at time of audit
 
 ```yaml
 stack:
-  evidence: ""   # observed | documented | inferred
-
   # Core
-  http-server: ""
-  routing: ""
-  validation: ""
-  orm-or-query-builder: ""
-  database-migrations: ""
+  http-server: {value: "", evidence: ""}    # observed | documented | inferred
+  routing: {value: "", evidence: ""}
+  validation: {value: "", evidence: ""}
+  orm-or-query-builder: {value: "", evidence: ""}
+  database-migrations: {value: "", evidence: ""}
 
   # Auth
-  authentication: ""
-  authorization: ""
+  authentication: {value: "", evidence: ""}
+  authorization: {value: "", evidence: ""}
 
   # Testing
-  testing-unit: ""
-  testing-integration: ""
-  testing-e2e: ""
+  testing-unit: {value: "", evidence: ""}
+  testing-integration: {value: "", evidence: ""}
+  testing-e2e: {value: "", evidence: ""}
 
   # Observability
-  logging: ""
-  error-tracking: ""
+  logging: {value: "", evidence: ""}
+  error-tracking: {value: "", evidence: ""}
 
   # Add or remove domains as needed for this project
 ```

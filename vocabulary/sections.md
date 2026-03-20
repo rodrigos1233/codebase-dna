@@ -20,9 +20,11 @@ The `evidence:` field is required on every entry in every section. Values:
 **Example:**
 ```yaml
 stack:
-  validation: "zod — parse at route entry only, never in service layer"
-  testing-unit: "vitest — all unit tests; jest is not used despite being in devDependencies"
+  validation: {value: "zod — parse at route entry only, never in service layer", evidence: documented}
+  testing-unit: {value: "vitest — all unit tests", evidence: observed}
 ```
+
+Note: "jest is not used despite being in devDependencies" belongs in `known-debt`, not `stack`. Stack entries describe which library to use. A note about a present-but-wrong library choice is a debt entry.
 
 ---
 
