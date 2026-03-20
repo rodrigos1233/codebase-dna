@@ -1,277 +1,50 @@
 # DNA Fingerprint
 
 <!--
-  Instructions for filling this template:
-  - position: (sliders) a number 0–10. (binaries) true or false.
-  - descriptive: what the codebase currently does. Required when position is filled.
-  - aspirational: what it should do. Omit if same as descriptive.
-  - notes: justification, exceptions, or agent guidance. Required for extreme positions (0–2 or 8–10) and inconsistency.
-  - Remove the instruction comments before committing this file.
+  This fingerprint describes how the codebase is written, not what it does.
+  It captures information an agent cannot see by reading a single file.
+  If a section has nothing to record, write [] for list sections or omit the section.
+  Remove instruction comments before committing.
 -->
 
 ## meta
 
 ```yaml
-project: ""                # Project or repo name
-audited-by: ""             # "human", "agent", or "human + agent"
-audited-at: ""             # ISO date: YYYY-MM-DD
-codebase-version: ""       # git commit SHA or version tag at time of audit
+project: ""              # repo or project name
+audited-by: ""           # "human", "agent", or "human + agent"
+audited-at: ""           # ISO date: YYYY-MM-DD
+codebase-version: ""     # git commit SHA or version tag at time of audit
 ```
 
 ## audit-notes
 
 <!--
-  Contradictions found, areas with insufficient evidence, axes where the
-  code and documentation disagreed. Leave blank if none.
+  Contradictions found, areas with insufficient evidence, or areas not sampled.
+  Leave blank if none.
 -->
 
 ---
 
-## sliders
-
-### coupling
-```yaml
-coupling:
-  position:           # 0 = tightly coupled, 10 = loosely coupled
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### abstraction-level
-```yaml
-abstraction-level:
-  position:           # 0 = close to the machine, 10 = domain language
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### code-density
-```yaml
-code-density:
-  position:           # 0 = sparse, 10 = dense
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### generality
-```yaml
-generality:
-  position:           # 0 = specific / YAGNI, 10 = general / framework-oriented
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### encapsulation
-```yaml
-encapsulation:
-  position:           # 0 = open / reach-through, 10 = strict public interface
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### configuration
-```yaml
-configuration:
-  position:           # 0 = hardcoded, 10 = fully configurable
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### service-granularity
-```yaml
-service-granularity:
-  position:           # 0 = monolith, 10 = microservices
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### data-consistency
-```yaml
-data-consistency:
-  position:           # 0 = eventual consistency, 10 = strong consistency
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### synchrony
-```yaml
-synchrony:
-  position:           # 0 = synchronous, 10 = asynchronous
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### statefulness
-```yaml
-statefulness:
-  position:           # 0 = stateless, 10 = stateful
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### test-coverage-posture
-```yaml
-test-coverage-posture:
-  position:           # 0 = minimal testing, 10 = comprehensive
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### documentation-density
-```yaml
-documentation-density:
-  position:           # 0 = minimal docs, 10 = heavily documented
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### type-strictness
-```yaml
-type-strictness:
-  position:           # 0 = untyped / any, 10 = strictly typed / invariants enforced
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### error-handling-loudness
-```yaml
-error-handling-loudness:
-  position:           # 0 = silent / swallowed, 10 = loud / fail-fast
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### defensive-programming
-```yaml
-defensive-programming:
-  position:           # 0 = trusting, 10 = defensive
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### memory-speed-tradeoff
-```yaml
-memory-speed-tradeoff:
-  position:           # 0 = compute on demand, 10 = cache aggressively
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### build-vs-buy-appetite
-```yaml
-build-vs-buy-appetite:
-  position:           # 0 = build everything, 10 = buy / adopt everything
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### dependency-appetite
-```yaml
-dependency-appetite:
-  position:           # 0 = dependency-averse, 10 = dependency-friendly
-  descriptive: >
-  aspirational: >
-  notes: >
-```
-
-### data-flow-patterns
-```yaml
-data-flow-patterns:
-  position:           # 0 = ad hoc flow, 10 = disciplined flow
-  descriptive: >
-  aspirational: >
-  notes: >            # cover: where transformation happens, data shape at boundaries, result type pattern
-```
-
----
-
-## binaries
-
-### pure-functions
-```yaml
-pure-functions:
-  value:              # true or false
-  scope: ""           # e.g., "utility layer only" — omit if applies globally
-  notes: >
-```
-
-### idempotency
-```yaml
-idempotency:
-  value:              # true or false
-  scope: ""           # e.g., "write endpoints and background jobs"
-  notes: >
-```
-
-### null-safety
-```yaml
-null-safety:
-  value:              # true or false
-  scope: ""           # e.g., "server-side TypeScript only" — omit if applies globally
-  notes: >
-```
-
-### determinism
-```yaml
-determinism:
-  value:              # true or false
-  scope: ""           # e.g., "domain and service layers — infrastructure layer excluded"
-  notes: >
-```
-
-### encryption-at-rest
-```yaml
-encryption-at-rest:
-  value:              # true or false
-  scope: ""           # e.g., "PII fields only" or "full disk via cloud provider"
-  notes: >
-```
-
-### authentication-boundaries
-```yaml
-authentication-boundaries:
-  value:              # true or false
-  scope: ""           # e.g., "HTTP API — internal gRPC calls use mTLS separately"
-  notes: >
-  mechanism: ""       # e.g., "JWT middleware applied globally in routes.ts"
-```
-
----
-
-## preferred-libs
+## stack
 
 <!--
-  Record the library or approach used per problem domain.
-  Include only domains where the project has a real opinion.
-  Remove rows that don't apply. Add rows the project needs.
-  Format: domain: "library-name — brief note on how it is used"
+  Libraries and tools the project has committed to per domain.
+  Admission: include a domain only if choosing the wrong library would create
+  visible inconsistency. This is not a dependency inventory.
+  Format: domain: "library — brief note on how or where it is used"
+  evidence field applies to the whole stack section, not per entry.
 -->
 
 ```yaml
-preferred-libs:
+stack:
+  evidence: ""   # observed | documented | inferred
+
   # Core
   http-server: ""
   routing: ""
+  validation: ""
   orm-or-query-builder: ""
   database-migrations: ""
-  validation: ""
 
   # Auth
   authentication: ""
@@ -281,17 +54,74 @@ preferred-libs:
   testing-unit: ""
   testing-integration: ""
   testing-e2e: ""
-  mocking: ""
 
   # Observability
   logging: ""
   error-tracking: ""
-  metrics: ""
 
-  # Infrastructure (include only if the project has opinions)
-  caching: ""
-  job-queue: ""
-  env-config: ""
+  # Add or remove domains as needed for this project
+```
+
+---
+
+## boundaries
+
+<!--
+  Structural constraints on what can call what, where auth/validation is enforced,
+  and placement rules (e.g., "new routes registered after authenticate(), not before").
+  Include the enforcement mechanism: lint rule, test, or convention.
+  evidence: observed | documented | inferred
+-->
+
+```yaml
+boundaries:
+  - rule: ""
+    enforced-by: ""   # "eslint-plugin-import", "test in boundaries.test.ts", "convention"
+    evidence: ""      # observed | documented | inferred
+```
+
+---
+
+## state-contracts
+
+<!--
+  Where state lives and which mechanism to use when.
+  Change-coupling is a first-class concern: "when you add X, you must also update Y and Z."
+  Include an entry only if violating it causes a runtime defect or a hard-to-trace bug.
+  evidence: observed | documented | inferred
+-->
+
+```yaml
+state-contracts:
+  - state: ""
+    mechanism: ""        # e.g., "Redux store via useSelector/useDispatch"
+    rule: ""             # what an agent must do when touching this state
+    change-coupling: ""  # omit if no coupling requirement exists
+    evidence: ""         # observed | documented | inferred
+```
+
+---
+
+## patterns
+
+<!--
+  Established idioms an agent would not infer from reading one file.
+  TWO admission gates — both must pass:
+    1. why-non-obvious: complete this honestly. If you cannot, cut the entry.
+    2. Failure mode check (not a field): what wrong thing would an agent do without this entry?
+       If there is no concrete wrong action, cut the entry.
+  Aspirational fields (current/target) only when an active migration changes what new code should do.
+  evidence: observed | documented | inferred
+-->
+
+```yaml
+patterns:
+  - name: ""
+    rule: ""
+    why-non-obvious: ""
+    evidence: ""         # observed | documented | inferred
+    # current: ""        # omit unless there is an active migration
+    # target: ""
 ```
 
 ---
@@ -299,30 +129,20 @@ preferred-libs:
 ## dead-ends
 
 <!--
-  Patterns tried and abandoned. Format each entry as shown.
-  Leave the list empty ([]) if none.
+  Patterns tried and abandoned. Evidence required — at least one of:
+    - Explicit documentation, comment, or commit message stating abandonment
+    - A clear replacement present in active code while old approach is absent from new code
+    - Repeated evidence new code avoids the pattern while old code still shows it
+  "This looks old" is not sufficient. Do not record folklore.
+  evidence: observed | documented | inferred
 -->
 
 ```yaml
 dead-ends:
   - pattern: ""
-    reason: >
-    replaced-by: ""
-```
-
----
-
-## simplicity-zones
-
-<!--
-  Areas intentionally kept simple that must not be abstracted or generalized.
-  Leave the list empty ([]) if none.
--->
-
-```yaml
-simplicity-zones:
-  - area: ""
-    rule: >
+    reason: ""
+    replaced-by: ""  # omit if nothing replaced it
+    evidence: ""     # observed | documented | inferred
 ```
 
 ---
@@ -330,16 +150,38 @@ simplicity-zones:
 ## known-debt
 
 <!--
-  Patterns that exist in the codebase but should not be imitated.
-  These are not dead ends (which were abandoned) — they are still present
-  but represent acknowledged violations of the team's own standards.
-  Leave the list empty ([]) if none.
+  Patterns still present in the codebase that must not be imitated.
+  Every entry must name a specific file, directory, or module in location:.
+  "The repo sometimes does X badly" is not actionable.
+  Aspirational fields (current/target) when there is an active direction.
+  evidence: observed | documented | inferred
 -->
 
 ```yaml
 known-debt:
   - pattern: ""
-    location: ""       # file, directory, or module where it appears
-    why-it-exists: >
-    do-not-imitate: >
+    location: ""       # file, directory, or module — required
+    why-it-exists: ""
+    do-not-imitate: "" # what to do instead, not just what not to do
+    evidence: ""       # observed | documented | inferred
+    # current: ""      # omit unless there is an active migration
+    # target: ""
+```
+
+---
+
+## simplicity-zones
+
+<!--
+  Areas intentionally kept simple that must not be abstracted or improved.
+  This section should be rare. Many entries means the section has lost meaning.
+  Captures deliberate local anti-abstraction rules — not general YAGNI sentiment.
+  evidence: observed | documented | inferred
+-->
+
+```yaml
+simplicity-zones:
+  - area: ""
+    rule: ""
+    evidence: ""  # observed | documented | inferred
 ```

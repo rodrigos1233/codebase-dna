@@ -1,78 +1,94 @@
 # Audit Prompt
 
-This is a ready-to-use prompt for an agent tasked with auditing a codebase and producing a draft `dna.md`. Copy this prompt directly or adapt it for your orchestration system.
+This is a ready-to-use prompt for an agent tasked with auditing a codebase and producing a `dna.md`. Copy it directly or adapt it for your orchestration system.
 
 ---
 
 ## Prompt
 
-You are auditing a codebase to produce a structured fingerprint called `dna.md`. The fingerprint describes *how* the code is written, not what it does. It will be used by future agents to write new code consistently without reading the whole codebase.
+Your job is not to classify this codebase. Your job is to find rules a local read would miss.
+
+An agent working on a single file already sees naming conventions, type annotations, error handling style, and which libraries are imported. The fingerprint you are producing captures only what that agent cannot see: structural constraints, established conventions that required deliberate choices, and traps left by past decisions.
+
+If an entry you are considering could be inferred by reading the file being modified, leave it out.
 
 ### Step 1: Load your reference materials
 
-Before reading any code, load these files from the `codebase-dna` skill:
+Before reading any code, load from the `codebase-dna` skill:
 
-1. `vocabulary/sliders.md` — definitions for all 19 slider axes
-2. `vocabulary/binaries.md` — definitions for all 6 binary properties
-3. `vocabulary/meta.md` — how to use descriptive vs aspirational positions, dead ends, simplicity zones, and drift
-4. `audit/sampling-strategy.md` — which files to read and in what order
+1. `vocabulary/sections.md` — definitions and admission rules for all seven sections
+2. `vocabulary/meta.md` — evidence levels, aspirational markers, and drift
+3. `audit/sampling-strategy.md` — which files to read and in what order
 
-Read all four files completely before proceeding. The vocabulary must be loaded before you read any code, or your classifications will be inconsistent.
+Read all three completely before reading any code. The admission rules must be loaded before you read anything, or you will record entries that do not belong.
 
 ### Step 2: Read the codebase
 
-Follow the reading order in `audit/sampling-strategy.md`:
+Follow `audit/sampling-strategy.md` in order:
 
-1. Project root files (README, package manifest, config files, existing agent docs)
-2. Entry points and middleware
-3. One full feature slice (route → handler → service → data layer)
-4. Test files for that slice
-5. Config and infrastructure files
+1. Existing agent documentation (CLAUDE.md, AGENTS.md, decisions logs)
+2. Configuration and enforcement files (package manifests, lint config, tsconfig)
+3. Entry points and module boundary definitions (main file, router, middleware stack, module index files)
+4. One full feature slice — read for boundary and state signals, not style classification
+5. Git history — dead end evidence only
+6. Test files — boundary and state signals only
 
-As you read, take notes per axis. Do not assign positions yet — just record what you observe.
+As you read, take notes on potential entries. Do not commit to a section yet — just record what you observe and where.
 
-### Step 3: Classify each axis
+### Step 3: Apply admission rules to your notes
 
-For each axis in `vocabulary/sliders.md` and each property in `vocabulary/binaries.md`:
+For each potential entry, apply the section's admission rules explicitly. Do this before writing output, not during.
 
-1. State what you observed in the code that informs this axis.
-2. Assign a position on the 0–10 scale (sliders) or true/false (binaries).
-3. Ask: Does the observed code reflect current reality, or does there appear to be an intended direction that the code is moving toward? If the latter, record an aspirational position.
-4. Write notes that would help a future agent understand the reasoning — especially for positions near the extremes or where you found inconsistency.
+**stack:** Would choosing the wrong library create visible inconsistency? If not, omit.
 
-Do not guess. If you did not read enough code to classify an axis, say so in the notes field rather than fabricating a position.
+**boundaries:** Does violating this rule produce a structural or security defect? Is the enforcement mechanism identifiable? If not, omit.
 
-### Step 4: Identify dead ends, simplicity zones, and known debt
+**state-contracts:** Does violating this cause a runtime defect or hard-to-trace bug? Is this invisible from the file being modified? If not, omit.
 
-**Dead ends:** Did you find patterns that appeared to be in the process of being replaced, or that the team documented as abandoned? Record them with why they were abandoned.
+**patterns — two gates:**
+1. Can you complete `why-non-obvious:` honestly? If the pattern is visible in context, cut it.
+2. What wrong thing would an agent do without this entry? If there is no concrete wrong action, cut it.
 
-**Simplicity zones:** Are there areas of the codebase that are intentionally simple and clearly should stay that way? Record them with the rule.
+**dead-ends:** Do you have evidence — documentation, commit history, a clear replacement in active code, or repeated absence in new code? "This looks old" is not sufficient. If you cannot cite evidence, do not record it.
 
-**Known debt:** Are there patterns in the codebase that clearly violate the team's own standards — present for historical reasons but not to be imitated? Record them here, not as the descriptive position.
+**known-debt:** Does the entry name a specific file, directory, or module? Does it say what to do instead? If either is missing, do not record it.
 
-### Step 5: Record preferred libraries
+**simplicity-zones:** Is this a deliberate local anti-abstraction decision, not a general preference? Is it specific enough to be actionable? If it is describing general YAGNI sentiment, omit it.
 
-For each problem domain the codebase addresses, record which library or approach is used. Use the categories in the `preferred-libs:` section of `template/dna.template.md`. Add categories as needed for the specific project.
+Cut any entry that does not pass its admission rule. It is better to have a short fingerprint that is trustworthy than a long one that includes folklore and inference passed off as fact.
 
-### Step 6: Flag contradictions and inconsistencies
+### Step 4: Assign evidence levels
 
-Before writing the final output, explicitly list:
+For every entry that survives Step 3, assign an evidence level:
 
-- Any axis where different parts of the codebase gave contradictory signals
-- Any case where the README, CLAUDE.md, or existing docs stated something different from what the code showed
-- Any axis where you had too little evidence to be confident
+- `observed` — you saw this pattern directly in active code
+- `documented` — it is stated in CLAUDE.md, README, a decisions log, commit message, or comment
+- `inferred` — you reasoned from partial evidence; you did not directly observe or read a statement
 
-Include these as notes in the relevant axis sections and as a summary at the top of the fingerprint under `audit-notes:`.
+Do not assign `observed` if you only saw it in one file. Do not assign `documented` if you are paraphrasing what you read — only if the source explicitly states the rule. When in doubt, use `inferred`.
+
+### Step 5: Identify aspirational entries
+
+For `known-debt` and `patterns` entries only: is there an active migration or stated direction that changes what new code should do? If so, add `current:` and `target:` fields. If the distinction does not change what an agent would write, omit the aspirational fields.
+
+### Step 6: Flag contradictions and gaps
+
+Before writing output, list explicitly:
+
+- Any area where different parts of the codebase gave contradictory signals (e.g., some modules follow a boundary rule, others don't)
+- Any area where documented conventions contradicted what the code shows
+- Any section where you had too little evidence to be confident
+
+Record these in `audit-notes`. They are not failures — they are information.
 
 ### Step 7: Write the output
 
-Fill `template/dna.template.md` with your findings. Rules:
+Fill `template/dna.template.md`. Rules:
 
-- Every axis must have a `position:` value. Do not leave axes blank.
-- If you have no evidence for an axis, set `position: unknown` and explain in `notes:`.
-- Use `aspirational:` only when there is clear evidence of intended direction different from current state.
-- `notes:` must be present for any position at 0–2 or 8–10, and for any axis with inconsistency.
-- The `dead-ends:`, `simplicity-zones:`, and `known-debt:` sections must be present even if empty.
-- Do not invent information. The fingerprint will be used to generate code. False certainty is worse than recorded uncertainty.
+- Every list section may be empty (`[]`) if there is nothing to record. Do not fabricate entries to fill a section.
+- `dead-ends` may be empty. An empty `dead-ends` is honest. A fabricated dead end is harmful.
+- `evidence:` is required on every entry. An entry without an evidence level is incomplete.
+- `audit-notes` must contain anything from Step 6, even if brief.
+- Do not invent information. False certainty in a fingerprint causes agents to make wrong decisions confidently.
 
-Output the filled `dna.md` as a single markdown document. Do not summarize or explain it — just output the document.
+Output the filled `dna.md` as a single markdown document. Do not summarize or explain it outside the document.
