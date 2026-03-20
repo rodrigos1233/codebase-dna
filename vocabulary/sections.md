@@ -30,7 +30,7 @@ Note: "jest is not used despite being in devDependencies" belongs in `known-debt
 
 ## boundaries
 
-**What it captures:** Structural constraints on what can call what, where authentication or validation is enforced, and placement rules. A placement rule is "new routes must be registered after the `authenticate()` call, not before" — it is a boundary constraint, not a coding idiom.
+**What it captures:** Structural constraints on what can call what, where authentication or validation is enforced, and placement rules. A placement rule is "new routes must be registered after the `authenticate()` call, not before" — it is a boundary constraint, not a coding idiom. Includes process boundaries — steps required outside the files being modified, such as updating a decisions log or a second file that must stay in sync.
 
 **Admission rule:** Include an entry only if violating it produces a structural or security defect — not just a style inconsistency. Every entry must name the enforcement mechanism: a lint rule, a test, or an acknowledged convention.
 
@@ -103,7 +103,9 @@ patterns:
 
 **What it captures:** Approaches that were tried, caused problems, and were intentionally abandoned. Recorded so future agents do not rediscover the same wrong path.
 
-**Admission rule:** Evidence is required. At least one of:
+**Admission rule — relevance test first:** Would an agent plausibly reach for this pattern when working in this codebase? If not, it is project history, not a trap. A build tool replaced two years ago before the current team joined is not a dead end — it is trivia. Apply this test before checking for evidence.
+
+**Evidence is then required.** At least one of:
 - Explicit documentation, commit message, or comment stating the approach was abandoned
 - A clear replacement pattern present in active code while the old approach is absent from new code
 - Repeated evidence that new code avoids the pattern while old code still shows it

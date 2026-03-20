@@ -101,6 +101,18 @@ If you find a dead end signal in git, read 2–3 commits to confirm the pattern 
 
 ---
 
+## 5b. Known-debt signal scan (5 minutes)
+
+Before finalising `known-debt`, scan all files in the sampled scope for inline comments containing `race`, `caveat`, `warning`, `note:`, `TODO`, or `do not`. These are high-probability known-debt signals that may not surface in architectural files or CLAUDE.md.
+
+```
+grep -rn --include="*.ts" --include="*.go" --include="*.py" -i "race\|caveat\|warning\|note:\|TODO\|do not" <src-dir>
+```
+
+For each match, check whether the surrounding comment names a specific file or location and says what to do instead. If it does, it is a candidate known-debt entry. If it is a general warning about a language or library feature with no codebase-specific constraint, omit it.
+
+---
+
 ## 6. Test files (10 minutes)
 
 Read 2–3 test files for the feature slice you traced, plus any test utility or fixture files.

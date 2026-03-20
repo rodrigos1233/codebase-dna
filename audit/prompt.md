@@ -45,9 +45,9 @@ For each potential entry, apply the section's admission rules explicitly. Do thi
 
 **state-contracts:** Does violating this cause a runtime defect or hard-to-trace bug? Is this invisible from the file being modified? If not, omit.
 
-**patterns — two gates:**
-1. Can you complete `why-non-obvious:` honestly? If the pattern is visible in context, cut it.
-2. What wrong thing would an agent do without this entry? If there is no concrete wrong action, cut it.
+**patterns — two gates, applied as rejection tests:**
+1. Apply as a cut: if you are writing `why-non-obvious:` and completing it feels like a stretch — if you find yourself explaining what the code does rather than why an agent would miss it — the entry is cut.
+2. Apply as a cut: name the concrete wrong action an agent would take without this entry. If you cannot name a specific wrong action, the entry is cut. "The agent might not know about this" is not a wrong action.
 
 **dead-ends:** Do you have evidence — documentation, commit history, a clear replacement in active code, or repeated absence in new code? "This looks old" is not sufficient. If you cannot cite evidence, do not record it.
 
@@ -92,3 +92,9 @@ Fill `template/dna.template.md`. Rules:
 - Do not invent information. False certainty in a fingerprint causes agents to make wrong decisions confidently.
 
 Output the filled `dna.md` as a single markdown document. Do not summarize or explain it outside the document.
+
+---
+
+## Two-agent validation
+
+Running a second agent with access to files not covered in the first pass is a useful quality check. Structured disagreement between two audits is signal — entries present in one but not the other should be reviewed against admission gates, not automatically merged or discarded. An entry in the second audit that the first missed is worth keeping only if it passes admission; an entry in the first that the second dropped may indicate the first over-captured.

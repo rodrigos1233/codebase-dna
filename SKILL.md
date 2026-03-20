@@ -54,7 +54,7 @@ scope/
 |---|---|
 | `stack` | Libraries committed to per domain — use these, not alternatives |
 | `boundaries` | Structural constraints on what can call what; auth placement; enforcement mechanism |
-| `state-contracts` | Where state lives; which mechanism to use when; what must be updated together |
+| `state-contracts` | Where state lives; which mechanism to use when; what must be updated together (change-coupling) |
 | `patterns` | Established idioms not inferrable from one file |
 | `dead-ends` | Approaches tried and abandoned — do not revisit |
 | `known-debt` | Patterns present but not to be imitated — location-scoped |
