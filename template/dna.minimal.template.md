@@ -1,37 +1,84 @@
-# DNA (minimal)
+# DNA Fingerprint
 
-Reusable, persistent compact fingerprint for injection into a system prompt or `CLAUDE.md`.
-Use this for long-lived includes; use `dna.inject.md` for task-scoped, freshly generated injection.
-Keep only rules that change implementation decisions.
+<!--
+  Compact template. Evidence levels and aspirational markers are omitted by design.
+  Agents reading this fingerprint should treat all entries as observed unless otherwise noted inline.
+  Use dna.template.md when evidence levels or active migrations need to be recorded.
+-->
 
-## meta
+```yaml
 project: ""
-language: ""
-stack: ""
+audited-by: ""
+audited-at: ""
+```
 
-## preferred libs
-testing: ""  # durable default only
-logging: ""  # durable default only
-validation: ""  # durable default only
-authentication: ""  # durable default only
-data-access: ""  # durable default only
+---
 
-## critical rules
-### do not use
-- ""
+## stack
 
-### keep simple
-- area: "" — rule: ""
+```yaml
+stack:
+  # domain: "library — note"
+```
 
-### known debt
-- pattern: "" — location: "" — do not imitate because: ""
+---
 
-## code-shaping constraints
-pure-functions: true/false — scope: ""
-idempotency: true/false — scope: ""
-null-safety: true/false — scope: ""
-determinism: true/false — scope: ""
-encryption-at-rest: true/false — scope: ""
-authentication-boundaries: true/false — scope: "" — mechanism: ""
-type-strictness: ""  # e.g. "strict - no any"
-error-handling-loudness: ""  # e.g. "fail fast with explicit logs"
+## boundaries
+
+```yaml
+boundaries:
+  - rule: ""
+    enforced-by: ""
+```
+
+---
+
+## state-contracts
+
+```yaml
+state-contracts:
+  - state: ""
+    mechanism: ""
+    rule: ""
+    # change-coupling: ""
+```
+
+---
+
+## patterns
+
+```yaml
+patterns:
+  - name: ""
+    rule: ""
+    why-non-obvious: ""
+```
+
+---
+
+## dead-ends
+
+```yaml
+dead-ends: []
+```
+
+---
+
+## known-debt
+
+```yaml
+known-debt:
+  - pattern: ""
+    location: ""
+    do-not-imitate: ""
+```
+
+---
+
+## simplicity-zones
+
+```yaml
+simplicity-zones:
+  - area: ""
+    rule: ""
+```

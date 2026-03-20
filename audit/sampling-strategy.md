@@ -1,131 +1,153 @@
 # Sampling Strategy
 
-A full codebase read is rarely possible or necessary. This document specifies which files to read, in what order, and what to extract from each — so an audit can produce a reliable fingerprint in a single focused pass.
+The reading goal is not to classify the codebase across a set of axes. It is to find information an agent cannot see by reading a single file: structural constraints, established conventions that required deliberate choices, and traps.
+
+Read in order. Stop a section early if it stops producing new non-local signal.
 
 ---
 
-## Read Order
+## 1. Existing agent and architecture documentation (5 minutes)
 
-### 1. Project Root (5 minutes)
-
-Start here before reading any code. These files reveal architecture intent and philosophy.
+Read these first. They often contain explicit conventions, stated dead ends, and placement rules that would otherwise require inference.
 
 **Read:**
-- `README.md` — stated goals, setup instructions, technology choices
-- `package.json` / `go.mod` / `Cargo.toml` / `pyproject.toml` — dependency count, test framework, build tools
-- `tsconfig.json` / `.eslintrc` / `pyproject.toml` / `clippy.toml` — type strictness, lint rules, code style enforcement
-- `.env.example` or `config/` directory — how much behavior is configurable
-- `docker-compose.yml` / `Makefile` / `justfile` — how the system is run and what services it depends on
-- `CLAUDE.md` / `AGENTS.md` / `.cursorrules` — any existing style guidance the team has written for agents
+- `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, or equivalent
+- `README.md` — stated constraints, not just project description
+- Any `decisions/`, `adr/`, or `docs/architecture/` files
+- Inline comments that explain *why* — not what
 
-**Extract:**
-- Technology stack and version constraints
-- External services the system depends on
-- Existing style documentation (already partially fills the fingerprint)
-- How many dependencies exist (dependency-appetite signal)
+**Looking for:**
+- Explicitly stated conventions (these become `documented` evidence entries)
+- Stated dead ends or rejected approaches
+- Known-debt acknowledgements
+- Simplicity rules ("do not add X to Y")
 
 ---
 
-### 2. Entry Points (10 minutes)
+## 2. Configuration and enforcement files (5 minutes)
 
-Entry points reveal how the system is organized and what it values at its boundaries.
-
-**For web services:** `main.go`, `app.py`, `server.ts`, `index.ts`, or equivalent
-**For CLIs:** the top-level command definition
-**For libraries:** the public export file
-**For jobs:** the job runner or scheduler entrypoint
+These reveal which constraints are mechanically enforced vs convention-only.
 
 **Read:**
-- The main entrypoint file
-- The router or request dispatcher (e.g., `routes.ts`, `router.go`)
-- The middleware stack — what runs before every request
+- `package.json` / `go.mod` / `Cargo.toml` — library choices (stack)
+- `tsconfig.json`, `.eslintrc`, `pyproject.toml`, `clippy.toml` — type strictness, lint rules
+- `eslint-plugin-import` or similar boundary enforcement configs
+- `.env.example` or `config/` — configurable vs hardcoded behavior
+- `docker-compose.yml` / `Makefile` — what services exist, how they communicate
 
-**Extract:**
-- Is there a clear auth boundary in middleware? (authentication-boundaries)
-- How are errors handled at the top level? (error-handling-loudness)
-- Sync or async request handling? (synchrony)
-- How is configuration loaded? (configuration)
+**Looking for:**
+- Which lint rules enforce boundaries (boundaries section)
+- Strict type settings — `strictNullChecks`, `noImplicitAny` (informs patterns and known-debt)
+- Library choices that reveal project opinions (stack)
+- Whether auth or validation enforcement is in config or convention
 
 ---
 
-### 3. One Full Feature Slice (20 minutes)
+## 3. Entry points and module boundary definitions (10 minutes)
 
-Pick one representative feature — not the simplest and not the most complex. Trace it from the inbound request to the data layer and back.
+These reveal how the system is organized and where structural constraints live.
 
-**Ideal feature:** A CRUD operation on a core domain entity (not auth, not health check).
+**Read:**
+- The main entrypoint: `main.go`, `server.ts`, `app.py`, `index.ts`
+- The router or request dispatcher: where routes are registered
+- The middleware stack: what runs before every request, in what order
+- Any `index.ts` / `mod.rs` / `__init__.py` that define module public interfaces
+
+**Looking for:**
+- Where authentication is checked — and what comes before vs after it (boundaries)
+- The dependency direction between modules — what imports what (boundaries)
+- Whether the router enforces placement or relies on convention (boundaries, evidence level)
+- What the public interface of each module exposes — what is intentionally hidden (boundaries)
+
+---
+
+## 4. One full feature slice — architecture read, not classification read (15 minutes)
+
+Trace one representative feature from inbound request to data layer. Pick a feature that touches multiple layers — not the simplest (auth, health check) and not the most complex.
 
 **Files to read in order:**
-1. The route or handler file that receives the request
-2. Any validation or serialization layer
-3. The service or use-case file that contains business logic
-4. The data access layer (repository, ORM model, raw queries)
-5. Any shared utilities or helpers called along the way
+1. Route or handler
+2. Validation or serialization layer (if separate)
+3. Service or use-case layer
+4. Data access layer
 
-**Extract:**
-- coupling: Do layers import each other directly or through interfaces?
-- abstraction-level: Does the service layer read like the business domain?
-- code-density: How long are functions? Are they chained or stepped?
-- pure-functions: Does the service layer take inputs and return outputs, or read/write state internally?
-- error-handling-loudness: Do errors propagate or get swallowed?
-- type-strictness: Are all types explicit? Is `any` used?
-- null-safety: Are nulls handled explicitly?
+**Looking for — non-local concerns only:**
+- Does the service layer call the data layer directly, or through an interface? (boundaries)
+- Is there a consistent shape at each layer boundary — DTOs, domain types, persistence types? (state-contracts or patterns)
+- Where does transformation between shapes happen, and is that placement consistent? (patterns)
+- Are non-deterministic inputs (time, random, UUIDs) injected or generated inline? (patterns)
+- Is there shared mutable state that must be updated in multiple places together? (state-contracts)
 
----
-
-### 4. Test Files (10 minutes)
-
-Read 2–3 test files for the feature slice you already traced, plus any test utility files.
-
-**Look for:**
-- Test file to source file ratio (test-coverage-posture signal)
-- Unit tests vs integration tests vs end-to-end — which is dominant?
-- Whether tests use mocks/spies or real dependencies (coupling and defensive-programming signal)
-- Whether test data is hardcoded or generated (determinism signal)
-- Whether tests read as specifications or as coverage exercises
-
-**Extract:**
-- test-coverage-posture: High, low, or spotty?
-- What the team values: fast unit tests, integration confidence, or end-to-end coverage?
-- Whether tests are first-class code or afterthoughts (naming, organization, comments)
+Do not spend time classifying things visible from the file itself: naming conventions, function length, comment density, type annotation coverage. These are locally legible.
 
 ---
 
-### 5. Config and Infrastructure Files (5 minutes)
+## 5. Git history — dead end evidence (5 minutes)
 
-**Read:**
-- All files in `config/`, `infra/`, `terraform/`, or `k8s/`
-- `.github/workflows/` or CI configuration
-- Any secrets management configuration
+Dead ends require evidence. The git log is the primary source.
 
-**Extract:**
-- Are secrets in environment variables, a vault, or (flag this) in code?
-- Is disk-level or database-level encryption configured? (encryption-at-rest)
-- What environments exist (dev/staging/prod)? How different are they?
-- Is deployment automated? What does the release process look like?
+**Run:**
+```
+git log --oneline --since="18 months ago" | head -60
+git log --oneline --all --grep="revert\|remove\|replace\|abandon\|migrate" | head -30
+```
 
----
+**Looking for:**
+- Commits that remove or replace a pattern ("replace class components with hooks", "remove redux-saga, use react-query")
+- Revert commits that explain why an approach was abandoned
+- Large refactors that signal a direction change
 
-## Large Codebases
-
-When the codebase is too large for the above pass (>50k lines), apply these constraints:
-
-1. **Limit the feature slice to one layer.** If you can only read one file, read the service/use-case layer. It reveals the most about business logic patterns.
-
-2. **Sample horizontally, not vertically.** Read the first 50 lines of 10 different service files rather than all of 2. Consistency of style matters more than depth for fingerprinting.
-
-3. **Weight recent files.** Check `git log --since="90 days ago" --name-only` to identify which files are actively worked on. Sample from active files — they reflect current intent, not legacy patterns.
-
-4. **Note what you didn't read.** If large areas of the codebase were not sampled, record this as uncertainty in the fingerprint notes.
+If you find a dead end signal in git, read 2–3 commits to confirm the pattern is actually gone from new code, not just renamed.
 
 ---
 
-## Red Flags That Suggest Aspirational Overrides Are Needed
+## 5b. Known-debt signal scan (5 minutes)
 
-These observations suggest the descriptive fingerprint should be accompanied by aspirational positions:
+Before finalising `known-debt`, scan all files in the sampled scope for inline comments containing `race`, `caveat`, `warning`, `note:`, `TODO`, or `do not`. These are high-probability known-debt signals that may not surface in architectural files or CLAUDE.md.
 
-- **Inconsistent patterns across modules** — some modules are well-structured, others are not. The team likely has a direction but hasn't refactored everything.
-- **A `CLAUDE.md` or `AGENTS.md` that contradicts what the code does** — the team's stated intent differs from current reality. Use the stated intent as aspirational.
-- **Active refactoring in progress** — if recent commits show a pattern being replaced (e.g., converting callbacks to async/await), record the target as aspirational.
-- **A `TODO` or `FIXME` density well above zero** — technical debt is acknowledged. The descriptive position reflects reality; aspirational should reflect intent.
-- **Tests that are skipped or commented out at a high rate** — test-coverage-posture should have an aspirational value if skipped tests suggest the team wants more coverage.
-- **Dead end patterns still in use in old modules** — record both the dead end and the fact that it exists in the codebase for historical reasons, not as a model to follow.
+```
+grep -rn --include="*.ts" --include="*.go" --include="*.py" -i "race\|caveat\|warning\|note:\|TODO\|do not" <src-dir>
+```
+
+For each match, check whether the surrounding comment names a specific file or location and says what to do instead. If it does, it is a candidate known-debt entry. If it is a general warning about a language or library feature with no codebase-specific constraint, omit it.
+
+---
+
+## 6. Test files (10 minutes)
+
+Read 2–3 test files for the feature slice you traced, plus any test utility or fixture files.
+
+**Looking for — non-local concerns only:**
+- Are tests organized to reflect layer boundaries, or do they cross layers freely? (boundaries signal)
+- Do test utilities enforce a particular test data pattern? (patterns)
+- Do tests mock internal modules — which modules are considered internal boundaries? (boundaries)
+- Are there test helpers that wrap a particular state setup — revealing state-contracts?
+- Do tests skip or are they commented out in large numbers? (if so, note in audit-notes)
+
+---
+
+## Large codebases (>50k lines)
+
+Apply these constraints when a full pass is not possible:
+
+1. **Weight recent files.** Run `git log --since="90 days ago" --name-only --pretty=format: | sort | uniq -c | sort -rn | head -30` to find the most actively modified files. Sample from those — they reflect current intent.
+
+2. **Sample module boundaries horizontally.** Read the first 30 lines of 8–10 different module index files rather than tracing one full feature slice. Consistency of the boundary pattern matters more than depth.
+
+3. **Prioritize agent docs.** A good CLAUDE.md or AGENTS.md for a large codebase is worth 30 minutes of code reading. Read it first and completely.
+
+4. **Record what you did not read.** If large areas were not sampled, note this in `audit-notes`. An `inferred` entry is better than a false `observed` entry.
+
+---
+
+## What not to look for
+
+Do not spend reading time on things that are locally legible. An agent will see these when working in context:
+
+- Naming conventions and code style
+- Function length and comment density
+- Type annotation coverage in individual files
+- Error handling patterns visible in the file being modified
+- Which libraries are imported (visible from the file)
+
+Record these only if the pattern is inconsistent across the codebase and the inconsistency itself is non-obvious signal (for example, a known-debt entry explaining why one module uses a different pattern than the rest).

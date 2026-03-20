@@ -1,188 +1,86 @@
 # Meta Concepts
 
-These concepts apply across all axes and properties. They are not additional axes — they are qualifiers and alerts that modify how fingerprint entries should be read and written.
+These concepts apply across all sections. They are qualifiers that modify how entries should be read and written — not additional sections.
 
 ---
 
-## Descriptive vs Aspirational
+## Evidence Levels
 
-Every position in a `dna.md` is one of two things:
+Every entry in every section carries an `evidence:` field. This field is what distinguishes a trustworthy fingerprint from a confident-sounding guess.
 
-**Descriptive** — reflects what the codebase currently does, based on evidence from reading the code. This is the default. If a position has no marker, it is descriptive.
+| Value | Meaning |
+|---|---|
+| `observed` | Seen directly in active code — the pattern is present and in use |
+| `documented` | Stated in CLAUDE.md, README, a decisions log, commit message, or inline comment |
+| `inferred` | Reasoned from partial evidence — a strong hint based on what was read, not confirmed |
 
-**Aspirational** — reflects what the team intends the codebase to become, even though the code doesn't reflect it yet. This must be explicitly marked with `aspirational: true` in the template.
+**How agents should use evidence levels:**
 
-### Why the distinction matters
-
-An agent using a `dna.md` to write new code must know whether to *match* the existing pattern or *lead toward* the intended pattern. These are opposite behaviors:
-
-- A codebase described as `test-coverage-posture: 2` (descriptive) means most of the code has no tests. A new function should have tests anyway — but the agent shouldn't be surprised to find untested neighbors.
-- A codebase described as `test-coverage-posture: 2` with `aspirational: 8` means the team wants comprehensive testing. New code should aim for the aspirational level, not match the current state.
-
-### How to write aspirational positions
-
-```yaml
-test-coverage-posture:
-  position: 2          # current reality
-  aspirational: 8      # where it should go
-  notes: >
-    Most legacy modules have no tests. New modules should have unit and
-    integration tests. Do not imitate the test-free pattern even where it
-    is common.
-```
-
-### How to read aspirational positions
-
-When both `position` and `aspirational` are present:
-- Use `aspirational` as your target when writing new code.
-- Use `position` to calibrate expectations about what you'll find in existing code.
-- Do not propagate the existing pattern just because it is common.
+- `observed` and `documented` entries are hard rules. Follow them.
+- `inferred` entries are strong hints. Follow them unless you observe clear contradictory evidence in the files you are working with. If you contradict an `inferred` entry, note it.
+- When multiple entries in the same section conflict, prefer `documented` over `observed` (documented intent over current implementation) and both over `inferred`.
 
 ---
 
-## Dead Ends
+## Aspirational Markers
 
-> **One-line distinction:** A dead end is a pattern that is **gone** — abandoned and replaced. Known debt (see below) is a pattern that is **still there** but should not be imitated.
+Aspirational markers appear only in `patterns` and `known-debt` entries, and only when there is an active migration or stated direction that changes what new code should do. If the distinction does not change agent behavior, omit the markers.
 
-A dead end is a pattern that was tried, caused problems, and was intentionally abandoned. Dead ends are recorded so that future agents and developers do not rediscover the same wrong path.
+**Fields:**
+- `current:` — describes what the codebase does now
+- `target:` — describes where it is moving
+- `do-not-imitate:` — explicit instruction for new code (used in `known-debt`)
 
-### What to record
-
-- The pattern that was tried
-- Why it was abandoned (the actual problem, not vague dissatisfaction)
-- What replaced it, if anything
-
-### Format
+**How to write:**
 
 ```yaml
-dead-ends:
-  - pattern: "Using class-based React components with local state for data fetching"
-    reason: >
-      Led to tangled lifecycle logic and race conditions. Superseded by
-      React Query + functional components.
-    replaced-by: "React Query hooks in functional components"
+# In known-debt:
+- pattern: "Error handling via thrown exceptions in service layer"
+  location: "src/services/"
+  why-it-exists: "Predates the Result type adoption; gradual migration underway"
+  do-not-imitate: "Use Result<T, E> returns for all new service functions"
+  evidence: documented
+  current: "Most services throw; callers use try/catch"
+  target: "Result<T, E> typed returns throughout"
 
-  - pattern: "Storing user sessions in JWT with 7-day expiry and no revocation"
-    reason: >
-      No way to force logout on credential compromise. Replaced with
-      short-lived JWTs and server-side refresh token store.
-    replaced-by: "15-min JWT + Redis-backed refresh tokens"
+# In patterns:
+- name: "State mutation"
+  rule: "Use structuredClone before mutating world state"
+  why-non-obvious: "Direct mutation causes aliasing bugs that don't surface in unit tests"
+  evidence: observed
+  current: "Older modules mutate directly — do not imitate"
+  target: "All state mutation goes through clone-then-modify"
 ```
 
-### How agents should use dead ends
+**How agents should use aspirational markers:**
 
-Before proposing a solution, check whether it matches a recorded dead end. If it does, do not propose it — even if it seems like the most natural approach. Explain why the dead end applies if it's non-obvious.
-
----
-
-## Simplicity Zones
-
-A simplicity zone is an area of the codebase that is intentionally kept simple and must not be generalized, abstracted, or made "better" in ways that add complexity.
-
-### Why simplicity zones exist
-
-Some areas are simple for a reason:
-- Performance-critical paths where overhead matters
-- Interfaces used by non-engineers (scripts, config files, CLI tools)
-- Bootstrapping code that runs before the framework is initialized
-- Areas where the cost of a bug is extremely high
-
-Agents default toward good engineering: abstraction, reuse, DRY. In simplicity zones, that default is wrong.
-
-### Format
-
-```yaml
-simplicity-zones:
-  - area: "Database migration scripts"
-    rule: >
-      Migrations must be plain SQL or minimal ORM calls. No helper
-      functions, no shared utilities, no imports from application code.
-      Each migration must be fully self-contained and readable in isolation.
-
-  - area: "Health check endpoint"
-    rule: >
-      Must remain a single function with no dependencies. Do not add
-      middleware, auth, or logging. It is called by load balancers under
-      pressure and must never fail due to application-layer issues.
-```
-
-### How agents should use simplicity zones
-
-When working in or near a simplicity zone, match the existing simplicity. Do not apply standard engineering improvements. If a task requires adding complexity to a simplicity zone, flag it explicitly before proceeding.
-
----
-
-## Known Debt
-
-> **One-line distinction:** Known debt is a pattern that is **still present** in the codebase but acknowledged as wrong. Dead ends (see above) are patterns that have been **removed and replaced**.
-
-Known debt exists because some code predates current standards, was written under pressure, or hasn't been refactored yet. It is recorded so that agents encountering it don't treat it as a model to follow.
-
-### What to record
-
-- The pattern that exists but shouldn't
-- Where it lives (module, directory, or specific file)
-- Why it exists (historical context, not judgment)
-- What not to do when working nearby
-
-### Format
-
-```yaml
-known-debt:
-  - pattern: "Raw SQL strings assembled with string concatenation"
-    location: "legacy/reports/"
-    why-it-exists: >
-      Written before the ORM was adopted. Not yet migrated because the
-      reports module is rarely touched and migration carries risk.
-    do-not-imitate: >
-      Use the query builder for all new queries, including in this directory.
-      Do not add new string-concatenated SQL even to match surrounding code.
-
-  - pattern: "console.log for debugging left in production paths"
-    location: "scattered — search for 'console.log' in src/"
-    why-it-exists: >
-      Accumulated over time before the structured logger was standardized.
-    do-not-imitate: >
-      Use the logger module for all output. console.log is not captured
-      by the log aggregator and will not appear in production dashboards.
-```
-
-### How agents should use known debt
-
-When you encounter a known-debt pattern while working in that area:
-1. Do not imitate it, even to stay consistent with surrounding code.
-2. Do not refactor it unless the task explicitly includes cleanup.
-3. Note in your output that you chose not to imitate the surrounding pattern and why.
+- Write new code toward `target:`, not to match `current:`.
+- Use `current:` to calibrate what you will find in existing code — do not be surprised by the old pattern, and do not propagate it.
 
 ---
 
 ## Drift
 
-Drift occurs when observed code contradicts the stated fingerprint. It is neither a bug nor a violation — it is information. Drift means either:
+Drift occurs when code you observe contradicts an entry in the fingerprint. It is not a bug — it is information. Drift means either the fingerprint is outdated, or the code is moving away from the team's stated conventions.
 
-1. The fingerprint is outdated and needs updating, or
-2. The code is drifting away from the team's stated intent
+**When to flag drift:**
 
-### When to flag drift
+- You observe a pattern that directly contradicts a `boundaries`, `state-contracts`, or `patterns` entry
+- A `dead-ends` entry describes a pattern you find in active use in new-looking code
+- An `inferred` entry turns out to be wrong based on what you read
 
-Flag drift when:
-- You observe a pattern in the code that contradicts a recorded position (e.g., the fingerprint says `pure-functions: true` but you find stateful logic throughout a module)
-- You are asked to write code and the relevant axis gives contradictory signals (the template says one thing, what you observe says another)
-- A dead end pattern appears in active use in a significant portion of the codebase
+**How to report drift:**
 
-### How to report drift
-
-Do not silently pick one signal over the other. Explicitly surface the contradiction:
+Do not silently pick one signal over the other. Surface it:
 
 ```
-Drift detected: The dna.md records `error-handling-loudness: 8` (loud, fail-fast),
-but the `payments/` module has 14 empty catch blocks and no logging. This may mean
-the fingerprint is aspirational in this area, or that this module was written before
-the standard was established.
+Drift detected: dna.md records that randomFloat is injected via config (patterns: "Randomness injection"),
+but two recently modified files in src/simulation/ call Math.random() directly.
+This may mean the pattern is aspirational, or that these files predate the convention.
 
-Proceeding with the loud pattern as instructed by the fingerprint. Flagging for review.
+Proceeding with injection as stated in the fingerprint. Flagging for review.
 ```
 
-### Updating the fingerprint after drift
+**When to update the fingerprint:**
 
-If drift is widespread and represents a real change in direction, update the fingerprint rather than treating all existing code as violations. The fingerprint should reflect reality, with aspirational positions used for forward guidance.
+If drift is widespread and represents a real change in direction, update the relevant entry — change `evidence: inferred` to `observed` if the evidence has shifted, or add aspirational markers if the team is intentionally moving away from the current state.
